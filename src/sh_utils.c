@@ -4,6 +4,8 @@
 #include <windows.h>
 #else
 #include <sys/ioctl.h>
+#include <unistd.h>
+#include <stdlib.h>
 #endif
 
 uint32_t terminal_columns()
@@ -15,8 +17,21 @@ uint32_t terminal_columns()
         return ret?csbi.dwSize.X:0;
 #else
         struct winsize win;
-        ioctl(0, TIOCGWINSZ, &win);
-        return win.ws_col;
+        const char *colenv;
+
+        if (isatty(0)) {
+                ioctl(0, TIOCGWINSZ, &win);
+                if (win.ws_col > 0)
+                        return win.ws_col;
+        }
+
+        if (colenv = getenv("COLUMNS")) {
+                int c = atoi(colenv);
+                if (c > 0)
+                        return c;
+        }
+
+        return 80;
 #endif
 }
 
