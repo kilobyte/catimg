@@ -19,8 +19,8 @@ uint32_t terminal_columns()
         struct winsize win;
         const char *colenv;
 
-        if (isatty(0)) {
-                ioctl(0, TIOCGWINSZ, &win);
+        if (isatty(1)) {
+                ioctl(1, TIOCGWINSZ, &win);
                 if (win.ws_col > 0)
                         return win.ws_col;
         }
